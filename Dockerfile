@@ -42,6 +42,8 @@ COPY --chmod=0644 rootfs/usr/local/lib/railway-bootstrap-db.php /usr/local/lib/r
 COPY --chmod=0644 rootfs/usr/local/lib/railway-healthz.php /usr/local/lib/railway-healthz.php
 COPY --chown=nobody:nobody --chmod=0644 \
      rootfs/etc/nginx/server-conf.d/railway-health.conf /etc/nginx/server-conf.d/railway-health.conf
+COPY --chown=nobody:nobody --chmod=0644 \
+     rootfs/etc/nginx/server-conf.d/railway-security.conf /etc/nginx/server-conf.d/railway-security.conf
 COPY --chmod=0755 railway-entrypoint.sh /railway-entrypoint.sh
 
 # Resolve Moodle's Composer dependencies as the user that owns the tree, so the
