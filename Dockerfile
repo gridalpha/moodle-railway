@@ -39,6 +39,9 @@ COPY --chown=nobody:nobody --chmod=0755 \
 # directory it has to create, so a new subdirectory would land without +x and the
 # non-root runtime user could not traverse into it.
 COPY --chmod=0644 rootfs/usr/local/lib/railway-bootstrap-db.php /usr/local/lib/railway-bootstrap-db.php
+COPY --chmod=0644 rootfs/usr/local/lib/railway-healthz.php /usr/local/lib/railway-healthz.php
+COPY --chown=nobody:nobody --chmod=0644 \
+     rootfs/etc/nginx/server-conf.d/railway-health.conf /etc/nginx/server-conf.d/railway-health.conf
 COPY --chmod=0755 railway-entrypoint.sh /railway-entrypoint.sh
 
 # Resolve Moodle's Composer dependencies as the user that owns the tree, so the
