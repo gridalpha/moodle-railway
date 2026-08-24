@@ -33,6 +33,9 @@ COPY --chmod=0644 rootfs/etc/php83/conf.d/zz-railway.ini /etc/php83/conf.d/zz-ra
 COPY --chown=nobody:nobody --chmod=0755 rootfs/etc/service/cron/run /etc/service/cron/run
 COPY --chown=nobody:nobody --chmod=0755 \
      rootfs/docker-entrypoint-init.d/50-railway.sh /docker-entrypoint-init.d/50-railway.sh
+COPY --chown=nobody:nobody --chmod=0755 \
+     rootfs/docker-entrypoint-init.d/00-railway-db.sh /docker-entrypoint-init.d/00-railway-db.sh
+COPY --chmod=0644 rootfs/usr/local/lib/railway/bootstrap_db.php /usr/local/lib/railway/bootstrap_db.php
 COPY --chmod=0755 railway-entrypoint.sh /railway-entrypoint.sh
 
 # Resolve Moodle's Composer dependencies as the user that owns the tree, so the

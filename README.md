@@ -11,6 +11,7 @@ this repository exists only for the four things a variable cannot express.
 |---|---|
 | `railway-entrypoint.sh` | Railway mounts volumes root-owned and the image runs as `nobody`, so Moodle cannot create its dataroot. Ownership is taken as root, then `su-exec` drops back to `nobody` before anything Moodle owns runs. |
 | Baked Composer dependencies | Moodle 5.1+ has real runtime dependencies, and the image resolves them on every boot. Doing it in a build layer turns a multi-minute, network-dependent start into a no-op. |
+| `00-railway-db.sh` | Railway's managed Postgres hands out the superuser on a shared database. This creates Moodle its own owner role and database from that credential, then revokes `PUBLIC` connect everywhere else. |
 | `50-railway.sh` | Sets `$CFG->getremoteaddrconf` and `$CFG->reverseproxyignore` so Moodle reads the real client address from behind Railway's edge instead of the edge itself. |
 | `zz-railway.ini`, `pm.max_children`, paced cron | The image ships opcache untuned, `pm.max_children=100` sized for a host rather than a container quota, and a cron loop that restarts as fast as runit allows. |
 
@@ -37,7 +38,8 @@ that matter on Railway:
 |---|---|
 | `SITE_URL` | `https://${{RAILWAY_PUBLIC_DOMAIN}}` — this becomes `$CFG->wwwroot` on first boot |
 | `SSLPROXY` | `true` — the edge terminates TLS |
-| `DB_*` | references to the managed Postgres service |
+| `DB_BOOTSTRAP_URL` | `${{Postgres.DATABASE_URL}}` — used once per boot to provision the scoped role; unset it to bring your own database |
+| `DB_HOST` / `DB_NAME` / `DB_USER` / `DB_PASS` | the scoped role this layer creates, not the managed superuser |
 | `REDIS_HOST` / `REDIS_PASSWORD` | managed Redis; enables Moodle's Redis session handler and application cache |
 | `SMTP_*` | Mailpit on the private network |
 | `MOODLE_USERNAME` / `MOODLE_PASSWORD` / `MOODLE_EMAIL` | the site administrator, re-applied on every boot |
