@@ -25,14 +25,21 @@ if ($dbpass === '') {
     fail('DB_PASS is empty; refusing to create a passwordless role.');
 }
 
+// libpq parses a string starting with postgresql:// as a URI and nothing else,
+// so a timeout has to ride along as a query parameter rather than as a
+// space-separated keyword.
+$dsn = $adminurl . (strpos($adminurl, '?') === false ? '?' : '&') . 'connect_timeout=5';
+
 // No service ordering on Railway, so the database may still be starting.
 $conn = false;
 for ($i = 1; $i <= 30; $i++) {
-    $conn = @pg_connect($adminurl . ' connect_timeout=5');
+    $conn = @pg_connect($dsn);
     if ($conn !== false) {
         break;
     }
-    out("waiting for Postgres ({$i}/30)");
+    $last = error_get_last();
+    $why = is_array($last) ? trim((string)$last['message']) : '';
+    out("waiting for Postgres ({$i}/30) {$why}");
     sleep(5);
 }
 if ($conn === false) {
