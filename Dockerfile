@@ -35,7 +35,10 @@ COPY --chown=nobody:nobody --chmod=0755 \
      rootfs/docker-entrypoint-init.d/50-railway.sh /docker-entrypoint-init.d/50-railway.sh
 COPY --chown=nobody:nobody --chmod=0755 \
      rootfs/docker-entrypoint-init.d/00-railway-db.sh /docker-entrypoint-init.d/00-railway-db.sh
-COPY --chmod=0644 rootfs/usr/local/lib/railway/bootstrap_db.php /usr/local/lib/railway/bootstrap_db.php
+# Keep this in an existing directory: BuildKit applies COPY --chmod to any parent
+# directory it has to create, so a new subdirectory would land without +x and the
+# non-root runtime user could not traverse into it.
+COPY --chmod=0644 rootfs/usr/local/lib/railway-bootstrap-db.php /usr/local/lib/railway-bootstrap-db.php
 COPY --chmod=0755 railway-entrypoint.sh /railway-entrypoint.sh
 
 # Resolve Moodle's Composer dependencies as the user that owns the tree, so the

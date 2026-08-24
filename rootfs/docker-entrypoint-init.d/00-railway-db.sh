@@ -12,4 +12,4 @@ if [ -z "${DB_BOOTSTRAP_URL:-}" ]; then
     exit 0
 fi
 
-exec /usr/bin/php /usr/local/lib/railway/bootstrap_db.php
+exec /usr/bin/php /usr/local/lib/railway-bootstrap-db.php
