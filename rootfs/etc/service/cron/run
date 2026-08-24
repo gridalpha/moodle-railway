@@ -1,0 +1,17 @@
+#!/bin/sh
+# Moodle cron, paced.
+#
+# The stock service re-execs cron.php as fast as runit can restart it. Moodle's
+# own guidance is once a minute; anything faster only burns CPU losing the cron
+# lock. Sleeping at the end and letting runit restart the service keeps the
+# supervision (and the SIGTERM handling) exactly as upstream has it.
+exec 2>&1
+
+if [ "${RUN_CRON_TASKS:-true}" = "false" ]; then
+    echo "RUN_CRON_TASKS=false - Moodle cron is disabled."
+    exec sleep 86400
+fi
+
+cd /var/www/html
+/usr/bin/php /var/www/html/admin/cli/cron.php || echo "moodle cron exited non-zero"
+exec sleep "${MOODLE_CRON_INTERVAL:-60}"
