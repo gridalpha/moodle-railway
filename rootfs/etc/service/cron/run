@@ -1,17 +1,18 @@
 #!/bin/sh
 # Moodle cron, paced.
 #
-# The stock service re-execs cron.php as fast as runit can restart it. Moodle's
-# own guidance is once a minute; anything faster only burns CPU losing the cron
-# lock. Sleeping at the end and letting runit restart the service keeps the
-# supervision (and the SIGTERM handling) exactly as upstream has it.
-exec 2>&1
+# cron.php keeps itself alive for ~180 seconds, polling for adhoc tasks about
+# once a second and printing a line each time. Upstream sends that to /dev/null
+# and so does this; stderr is left alone so a real failure still reaches
+# `railway logs`. The trailing sleep is the gap between keep-alive windows —
+# runit restarts this script as soon as it exits.
 
 if [ "${RUN_CRON_TASKS:-true}" = "false" ]; then
-    echo "RUN_CRON_TASKS=false - Moodle cron is disabled."
+    echo "RUN_CRON_TASKS=false - Moodle cron is disabled." >&2
     exec sleep 86400
 fi
 
 cd /var/www/html
-/usr/bin/php /var/www/html/admin/cli/cron.php || echo "moodle cron exited non-zero"
+/usr/bin/php /var/www/html/admin/cli/cron.php > /dev/null || \
+    echo "moodle cron exited non-zero" >&2
 exec sleep "${MOODLE_CRON_INTERVAL:-60}"
